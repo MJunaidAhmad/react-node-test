@@ -7,20 +7,17 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000, // 10 second timeout
+  timeout: 10000,
 });
 
-// Helper function to extract error message
 export const getErrorMessage = (error: unknown): string => {
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError<{ message?: string; error?: string }>;
     
     if (axiosError.response) {
-      // Server responded with error status
       const message = axiosError.response.data?.message || axiosError.response.data?.error;
       if (message) return message;
       
-      // Default messages based on status code
       switch (axiosError.response.status) {
         case 400:
           return 'Invalid request. Please check your input.';
@@ -42,10 +39,8 @@ export const getErrorMessage = (error: unknown): string => {
           return `Error ${axiosError.response.status}: ${axiosError.response.statusText}`;
       }
     } else if (axiosError.request) {
-      // Request made but no response received
       return 'Network error. Please check your internet connection and try again.';
     } else {
-      // Something else happened
       return axiosError.message || 'An unexpected error occurred.';
     }
   }
@@ -57,22 +52,18 @@ export const getErrorMessage = (error: unknown): string => {
   return 'An unknown error occurred. Please try again.';
 };
 
-// Add response interceptor to handle errors consistently
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Error is already formatted, just reject it
     return Promise.reject(error);
   }
 );
 
-// Initialize database
 export const initializeDatabase = async () => {
   const response = await api.post('/init');
   return response.data;
 };
 
-// Products API
 export const getProducts = async (params?: { category?: string; featured?: boolean; search?: string }) => {
   const response = await api.get('/products', { params });
   return response.data;
@@ -83,7 +74,6 @@ export const getProduct = async (id: string) => {
   return response.data;
 };
 
-// Users API
 export const getUsers = async () => {
   const response = await api.get('/users');
   return response.data;
@@ -98,8 +88,6 @@ export const createUser = async (userData: { email: string; name: string; role?:
   const response = await api.post('/users', userData);
   return response.data;
 };
-
-// Orders API
 export const getOrders = async (params?: { userId?: string; status?: string }) => {
   const response = await api.get('/orders', { params });
   return response.data;

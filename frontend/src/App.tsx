@@ -20,7 +20,6 @@ function App() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Auto-initialize on app start
     handleInitialize();
   }, []);
 

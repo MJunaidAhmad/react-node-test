@@ -81,7 +81,6 @@ export default function ProductDetailPage() {
       description: `${product.name} has been added to your cart.`,
     });
     
-    // Reset button state after a brief delay for UX
     setTimeout(() => {
       setAddingToCart(false);
     }, 300);
@@ -107,11 +106,10 @@ export default function ProductDetailPage() {
               src={product.imageUrl}
               alt={product.name}
               className="w-full h-full object-cover"
-              loading="lazy"
-              onError={(e) => {
-                // Fallback to placeholder if image fails to load
-                e.currentTarget.src = 'https://via.placeholder.com/800x600?text=' + encodeURIComponent(product.name);
-              }}
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://via.placeholder.com/800x600?text=' + encodeURIComponent(product.name);
+                    }}
             />
           </div>
           <CardTitle className="text-3xl">{product.name}</CardTitle>

@@ -6,7 +6,6 @@ import { syncOrderServiceConfig } from './orderController';
 
 export const initializeDatabase = async (req: Request, res: Response) => {
     try {
-        // Check if seed data already exists by looking for specific seed records
         const adminUser = await User.findOne({ email: 'admin@ericcressey.com' });
         const seedProduct = await Product.findOne({ name: 'Premium Training Program' });
 
@@ -26,7 +25,6 @@ export const initializeDatabase = async (req: Request, res: Response) => {
             });
         }
 
-        // Create sample products - check if they exist first
         const productsData = [
             {
                 name: 'Premium Training Program',
@@ -210,7 +208,6 @@ export const initializeDatabase = async (req: Request, res: Response) => {
             },
         ];
 
-        // Check which products already exist and only insert new ones
         const productsToInsert = [];
         for (const productData of productsData) {
             const existingProduct = await Product.findOne({ name: productData.name });
@@ -224,7 +221,6 @@ export const initializeDatabase = async (req: Request, res: Response) => {
             try {
                 products = await Product.insertMany(productsToInsert, { ordered: false });
             } catch (insertError: any) {
-                // If some products were inserted but others failed, fetch all existing products
                 if (insertError.code === 11000 || insertError.name === 'MongoBulkWriteError') {
                     const productNames = productsData.map((p) => p.name);
                     products = await Product.find({ name: { $in: productNames } });
@@ -234,11 +230,9 @@ export const initializeDatabase = async (req: Request, res: Response) => {
             }
         }
 
-        // Fetch all products (both newly inserted and existing) for order creation
         const productNames = productsData.map((p) => p.name);
         products = await Product.find({ name: { $in: productNames } });
 
-        // Create sample users - check each one before inserting
         const usersData = [
             { email: 'admin@ericcressey.com', name: 'Admin User', role: 'admin' },
             { email: 'john.doe@example.com', name: 'John Doe', role: 'customer' },
@@ -263,7 +257,6 @@ export const initializeDatabase = async (req: Request, res: Response) => {
             try {
                 users = await User.insertMany(usersToInsert, { ordered: false });
             } catch (insertError: any) {
-                // If some users were inserted but others failed, fetch all existing users
                 if (insertError.code === 11000 || insertError.name === 'MongoBulkWriteError') {
                     const userEmails = usersData.map((u) => u.email);
                     users = await User.find({ email: { $in: userEmails } });
@@ -273,11 +266,9 @@ export const initializeDatabase = async (req: Request, res: Response) => {
             }
         }
 
-        // Always fetch all users (both newly inserted and existing) for order creation
         const userEmails = usersData.map((u) => u.email);
         users = await User.find({ email: { $in: userEmails } });
 
-        // Create sample orders
         const user1 = users.find((u) => u.email === 'john.doe@example.com');
         const user2 = users.find((u) => u.email === 'jane.smith@example.com');
         const user3 = users.find((u) => u.email === 'mike.johnson@example.com');
@@ -390,7 +381,6 @@ export const initializeDatabase = async (req: Request, res: Response) => {
     } catch (error: any) {
         console.error('Initialization error:', error);
 
-        // Handle duplicate key errors (E11000)
         if (error.code === 11000 || error.name === 'MongoBulkWriteError') {
             const existingProducts = await Product.countDocuments();
             const existingUsers = await User.countDocuments();

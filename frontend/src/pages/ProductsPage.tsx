@@ -101,7 +101,6 @@ export default function ProductsPage() {
                     className="w-full h-full object-cover"
                     loading="lazy"
                     onError={(e) => {
-                      // Fallback to placeholder if image fails to load
                       e.currentTarget.src = 'https://via.placeholder.com/400x300?text=' + encodeURIComponent(product.name);
                     }}
                   />

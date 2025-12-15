@@ -26,7 +26,6 @@ const CART_STORAGE_KEY = 'shopping_cart';
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(() => {
-    // Load from localStorage on mount
     try {
       const stored = localStorage.getItem(CART_STORAGE_KEY);
       return stored ? JSON.parse(stored) : [];
@@ -35,7 +34,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   });
 
-  // Persist to localStorage whenever items change
   useEffect(() => {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
   }, [items]);
@@ -45,14 +43,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const existingItem = prevItems.find((i) => i.productId === item.productId);
       
       if (existingItem) {
-        // Update quantity if item already exists
         return prevItems.map((i) =>
           i.productId === item.productId
             ? { ...i, quantity: i.quantity + (item.quantity || 1) }
             : i
         );
       } else {
-        // Add new item
         return [...prevItems, { ...item, quantity: item.quantity || 1 }];
       }
     });

@@ -61,7 +61,6 @@ export const createOrder = async (req: Request, res: Response) => {
   try {
     const { userId, items, shippingAddress } = req.body;
 
-    // Validate items and calculate total
     let total = 0;
     const validatedItems = [];
 
@@ -100,7 +99,6 @@ export const createOrder = async (req: Request, res: Response) => {
 
     await order.save();
 
-    // Update product stock
     for (const item of validatedItems) {
       await Product.findByIdAndUpdate(item.productId, {
         $inc: { stock: -item.quantity },

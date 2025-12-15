@@ -87,7 +87,6 @@ export default function CheckoutPage() {
 
   const handleInputChange = (field: keyof ShippingFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error for this field when user starts typing
     if (errors[field]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -108,11 +107,9 @@ export default function CheckoutPage() {
     setLoading(true);
 
     try {
-      // Get or create user
       let userId: string;
       
       try {
-        // Try to find existing user by email
         const usersResponse = await getUsers();
         if (usersResponse.success) {
           const existingUser = usersResponse.data.find(
@@ -122,7 +119,6 @@ export default function CheckoutPage() {
           if (existingUser) {
             userId = existingUser._id;
           } else {
-            // Create new user
             const userResponse = await createUser({
               email: formData.email,
               name: formData.name,
@@ -138,7 +134,6 @@ export default function CheckoutPage() {
           throw new Error('Failed to fetch users');
         }
       } catch (userError: unknown) {
-        // If user creation fails, try to create one
         try {
           const userResponse = await createUser({
             email: formData.email,
@@ -156,7 +151,6 @@ export default function CheckoutPage() {
         }
       }
 
-      // Create order
       const orderResponse = await createOrder({
         userId,
         items: items.map((item) => ({
@@ -173,25 +167,21 @@ export default function CheckoutPage() {
       });
 
       if (orderResponse && orderResponse.success) {
-        // Show success toast
         toast({
           variant: 'success',
           title: 'Order Placed Successfully!',
           description: 'Your order has been confirmed and will be processed shortly.',
         });
         
-        // Clear cart and redirect to confirmation page
         clearCart();
         navigate(`/order-confirmation/${orderResponse.data._id}`);
       } else {
         throw new Error(orderResponse?.message || 'Failed to create order');
       }
     } catch (err: unknown) {
-      // Handle axios errors and other errors
       const errorMessage = getErrorMessage(err);
       setError(errorMessage);
       
-      // Show error toast
       toast({
         variant: 'destructive',
         title: 'Order Failed',
