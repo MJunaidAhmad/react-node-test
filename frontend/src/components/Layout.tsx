@@ -1,12 +1,16 @@
 import { Link } from 'react-router-dom';
 import { Button } from './ui/button';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, ShoppingCart } from 'lucide-react';
+import { useCart } from '../contexts/CartContext';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export default function Layout({ children }: LayoutProps) {
+  const { getTotalItems } = useCart();
+  const itemCount = getTotalItems();
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
@@ -21,6 +25,16 @@ export default function Layout({ children }: LayoutProps) {
             </Link>
             <Link to="/products">
               <Button variant="ghost">Products</Button>
+            </Link>
+            <Link to="/cart">
+              <Button variant="ghost" className="relative">
+                <ShoppingCart className="h-5 w-5" />
+                {itemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
+                    {itemCount > 99 ? '99+' : itemCount}
+                  </span>
+                )}
+              </Button>
             </Link>
           </nav>
         </div>

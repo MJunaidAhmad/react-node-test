@@ -9,6 +9,24 @@ const api = axios.create({
   },
 });
 
+// Add response interceptor to handle errors consistently
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Handle network errors or API errors
+    if (error.response) {
+      // Server responded with error status
+      return Promise.reject(error);
+    } else if (error.request) {
+      // Request made but no response received
+      return Promise.reject(new Error('Network error. Please check your connection.'));
+    } else {
+      // Something else happened
+      return Promise.reject(error);
+    }
+  }
+);
+
 // Initialize database
 export const initializeDatabase = async () => {
   const response = await api.post('/init');
