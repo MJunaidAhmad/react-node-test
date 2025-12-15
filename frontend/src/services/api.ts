@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -7,23 +7,62 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000, // 10 second timeout
 });
+
+// Helper function to extract error message
+export const getErrorMessage = (error: unknown): string => {
+  if (axios.isAxiosError(error)) {
+    const axiosError = error as AxiosError<{ message?: string; error?: string }>;
+    
+    if (axiosError.response) {
+      // Server responded with error status
+      const message = axiosError.response.data?.message || axiosError.response.data?.error;
+      if (message) return message;
+      
+      // Default messages based on status code
+      switch (axiosError.response.status) {
+        case 400:
+          return 'Invalid request. Please check your input.';
+        case 401:
+          return 'Unauthorized. Please log in.';
+        case 403:
+          return 'Access forbidden.';
+        case 404:
+          return 'Resource not found.';
+        case 409:
+          return 'Conflict. This resource already exists.';
+        case 422:
+          return 'Validation error. Please check your input.';
+        case 500:
+          return 'Server error. Please try again later.';
+        case 503:
+          return 'Service unavailable. Please try again later.';
+        default:
+          return `Error ${axiosError.response.status}: ${axiosError.response.statusText}`;
+      }
+    } else if (axiosError.request) {
+      // Request made but no response received
+      return 'Network error. Please check your internet connection and try again.';
+    } else {
+      // Something else happened
+      return axiosError.message || 'An unexpected error occurred.';
+    }
+  }
+  
+  if (error instanceof Error) {
+    return error.message;
+  }
+  
+  return 'An unknown error occurred. Please try again.';
+};
 
 // Add response interceptor to handle errors consistently
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle network errors or API errors
-    if (error.response) {
-      // Server responded with error status
-      return Promise.reject(error);
-    } else if (error.request) {
-      // Request made but no response received
-      return Promise.reject(new Error('Network error. Please check your connection.'));
-    } else {
-      // Something else happened
-      return Promise.reject(error);
-    }
+    // Error is already formatted, just reject it
+    return Promise.reject(error);
   }
 );
 

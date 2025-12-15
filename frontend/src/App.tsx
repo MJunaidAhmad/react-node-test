@@ -1,8 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { initializeDatabase } from './services/api';
+import { initializeDatabase, getErrorMessage } from './services/api';
 import { CartProvider } from './contexts/CartContext';
 import { Toaster } from './components/ui/toaster';
+import { useToast } from './hooks/use-toast';
 import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
 import ProductsPage from './pages/ProductsPage';
@@ -15,6 +16,8 @@ import { Button } from './components/ui/button';
 function App() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
+  const [initError, setInitError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Auto-initialize on app start
@@ -23,11 +26,27 @@ function App() {
 
   const handleInitialize = async () => {
     setIsInitializing(true);
+    setInitError(null);
     try {
-      await initializeDatabase();
-      setIsInitialized(true);
-      console.log('✅ Database initialized successfully');
+      const response = await initializeDatabase();
+      if (response.success) {
+        setIsInitialized(true);
+        toast({
+          variant: 'success',
+          title: 'Database Initialized',
+          description: 'Application is ready to use.',
+        });
+      } else {
+        throw new Error(response.message || 'Failed to initialize database');
+      }
     } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      setInitError(errorMessage);
+      toast({
+        variant: 'destructive',
+        title: 'Initialization Failed',
+        description: errorMessage,
+      });
       console.error('❌ Failed to initialize database:', error);
     } finally {
       setIsInitializing(false);
@@ -44,6 +63,9 @@ function App() {
           ) : (
             <div className="space-y-2">
               <p className="text-muted-foreground">Database not initialized</p>
+              {initError && (
+                <p className="text-sm text-destructive mb-2">{initError}</p>
+              )}
               <Button onClick={handleInitialize}>Initialize Database</Button>
             </div>
           )}

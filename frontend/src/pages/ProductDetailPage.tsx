@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getProduct } from '../services/api';
+import { getProduct, getErrorMessage } from '../services/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { useCart } from '../contexts/CartContext';
@@ -38,8 +38,16 @@ export default function ProductDetailPage() {
       const response = await getProduct(productId);
       if (response.success) {
         setProduct(response.data);
+      } else {
+        throw new Error(response.message || 'Failed to load product');
       }
     } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      toast({
+        variant: 'destructive',
+        title: 'Failed to Load Product',
+        description: errorMessage,
+      });
       console.error('Failed to load product:', error);
     } finally {
       setLoading(false);

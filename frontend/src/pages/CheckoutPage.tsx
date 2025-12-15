@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
-import { createOrder, createUser, getUsers } from '../services/api';
+import { createOrder, createUser, getUsers, getErrorMessage } from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -137,7 +137,7 @@ export default function CheckoutPage() {
         } else {
           throw new Error('Failed to fetch users');
         }
-      } catch (userError: any) {
+      } catch (userError: unknown) {
         // If user creation fails, try to create one
         try {
           const userResponse = await createUser({
@@ -148,10 +148,11 @@ export default function CheckoutPage() {
           if (userResponse.success) {
             userId = userResponse.data._id;
           } else {
-            throw new Error('Failed to create user');
+            throw new Error(userResponse.message || 'Failed to create user');
           }
-        } catch {
-          throw new Error('Failed to create or find user. Please try again.');
+        } catch (createError: unknown) {
+          const errorMsg = getErrorMessage(createError);
+          throw new Error(`Failed to create or find user: ${errorMsg}`);
         }
       }
 
@@ -185,12 +186,9 @@ export default function CheckoutPage() {
       } else {
         throw new Error(orderResponse?.message || 'Failed to create order');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Handle axios errors and other errors
-      const errorMessage = 
-        err.response?.data?.message || 
-        err.message || 
-        'Failed to place order. Please try again.';
+      const errorMessage = getErrorMessage(err);
       setError(errorMessage);
       
       // Show error toast

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getOrder } from '../services/api';
+import { getOrder, getErrorMessage } from '../services/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
+import { useToast } from '../hooks/use-toast';
 import { CheckCircle, ShoppingBag } from 'lucide-react';
 
 interface OrderItem {
@@ -37,6 +38,7 @@ export default function OrderConfirmationPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (id) {
@@ -47,14 +49,22 @@ export default function OrderConfirmationPage() {
   const loadOrder = async (orderId: string) => {
     try {
       setLoading(true);
+      setError(null);
       const response = await getOrder(orderId);
       if (response.success) {
         setOrder(response.data);
       } else {
-        setError('Order not found');
+        throw new Error(response.message || 'Order not found');
       }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load order');
+    } catch (err: unknown) {
+      const errorMessage = getErrorMessage(err);
+      setError(errorMessage);
+      toast({
+        variant: 'destructive',
+        title: 'Failed to Load Order',
+        description: errorMessage,
+      });
+      console.error('Failed to load order:', err);
     } finally {
       setLoading(false);
     }
