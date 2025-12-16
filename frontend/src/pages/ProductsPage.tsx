@@ -94,14 +94,14 @@ export default function ProductsPage() {
           return (
             <Card key={product._id}>
               <CardHeader>
-                <div className="aspect-video bg-muted rounded-md mb-4 overflow-hidden">
+                <div className="aspect-square bg-muted rounded-md mb-4 overflow-hidden">
                   <img
-                    src={product.imageUrl}
+                    src={product.imageUrl || `https://placehold.co/400x400/6366f1/ffffff?text=${encodeURIComponent(product.name)}`}
                     alt={product.name}
                     className="w-full h-full object-cover"
                     loading="lazy"
                     onError={(e) => {
-                      e.currentTarget.src = 'https://via.placeholder.com/400x300?text=' + encodeURIComponent(product.name);
+                      e.currentTarget.src = `https://placehold.co/400x400/6366f1/ffffff?text=${encodeURIComponent(product.name)}`;
                     }}
                   />
                 </div>

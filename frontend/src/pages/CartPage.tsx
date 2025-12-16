@@ -39,7 +39,7 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
             <ShoppingBag className="h-16 w-16 text-muted-foreground mb-4" />
@@ -57,7 +57,7 @@ export default function CartPage() {
   const total = getTotalPrice();
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       <div>
         <h1 className="text-3xl font-bold mb-2">Shopping Cart</h1>
         <p className="text-muted-foreground">{getTotalItems()} item(s) in your cart</p>
@@ -69,16 +69,15 @@ export default function CartPage() {
             <Card key={item.productId}>
               <CardContent className="p-6">
                 <div className="flex gap-4">
-                  <div className="aspect-square w-24 h-24 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
-                    {item.imageUrl ? (
-                      <img
-                        src={item.imageUrl}
-                        alt={item.name}
-                        className="w-full h-full object-cover rounded-md"
-                      />
-                    ) : (
-                      <ShoppingBag className="h-8 w-8 text-muted-foreground" />
-                    )}
+                  <div className="aspect-square w-24 h-24 bg-muted rounded-md overflow-hidden flex-shrink-0">
+                    <img
+                      src={item.imageUrl || `https://placehold.co/96x96/6366f1/ffffff?text=${encodeURIComponent(item.name)}`}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = `https://placehold.co/96x96/6366f1/ffffff?text=${encodeURIComponent(item.name)}`;
+                      }}
+                    />
                   </div>
                   <div className="flex-1 flex flex-col justify-between">
                     <div>

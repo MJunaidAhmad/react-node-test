@@ -359,16 +359,15 @@ export default function CheckoutPage() {
               <div className="space-y-3">
                 {items.map((item) => (
                   <div key={item.productId} className="flex gap-3">
-                    <div className="aspect-square w-16 h-16 bg-muted rounded-md flex items-center justify-center flex-shrink-0">
-                      {item.imageUrl ? (
-                        <img
-                          src={item.imageUrl}
-                          alt={item.name}
-                          className="w-full h-full object-cover rounded-md"
-                        />
-                      ) : (
-                        <ShoppingBag className="h-6 w-6 text-muted-foreground" />
-                      )}
+                    <div className="aspect-square w-16 h-16 bg-muted rounded-md overflow-hidden flex-shrink-0">
+                      <img
+                        src={item.imageUrl || `https://placehold.co/64x64/6366f1/ffffff?text=${encodeURIComponent(item.name)}`}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = `https://placehold.co/64x64/6366f1/ffffff?text=${encodeURIComponent(item.name)}`;
+                        }}
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">{item.name}</p>

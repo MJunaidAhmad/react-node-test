@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getProduct, getErrorMessage } from '../services/api';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Card, CardDescription, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { useCart } from '../contexts/CartContext';
 import { useToast } from '../hooks/use-toast';
@@ -98,80 +98,88 @@ export default function ProductDetailPage() {
   const cartQuantity = getCartItemQuantity(product._id);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto">
       <Card>
-        <CardHeader>
-          <div className="aspect-video bg-muted rounded-md mb-4 overflow-hidden">
-            <img
-              src={product.imageUrl}
-              alt={product.name}
-              className="w-full h-full object-cover"
-                    loading="lazy"
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://via.placeholder.com/800x600?text=' + encodeURIComponent(product.name);
-                    }}
-            />
-          </div>
-          <CardTitle className="text-3xl">{product.name}</CardTitle>
-          <CardDescription className="text-lg">{product.category}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">{product.description}</p>
-          <div className="flex items-center justify-between pt-4 border-t">
-            <div>
-              <p className="text-3xl font-bold">${product.price.toFixed(2)}</p>
-              <p className="text-sm text-muted-foreground">
-                Stock: {product.stock} available
-              </p>
-              {itemInCart && (
-                <p className="text-sm text-green-600 font-medium mt-1 flex items-center gap-1">
-                  <CheckCircle2 className="h-4 w-4" />
-                  {cartQuantity} {cartQuantity === 1 ? 'item' : 'items'} in cart
-                </p>
-              )}
+        <div className="grid md:grid-cols-2 gap-6 p-6">
+          <div className="flex items-center justify-center">
+            <div className="w-full max-w-md aspect-square bg-muted rounded-lg overflow-hidden">
+              <img
+                src={product.imageUrl || `https://placehold.co/500x500/6366f1/ffffff?text=${encodeURIComponent(product.name)}`}
+                alt={product.name}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                onError={(e) => {
+                  e.currentTarget.src = `https://placehold.co/500x500/6366f1/ffffff?text=${encodeURIComponent(product.name)}`;
+                }}
+              />
             </div>
-            <div className="flex flex-col items-end gap-2">
-              {itemInCart ? (
-                <>
+          </div>
+          
+          <div className="flex flex-col justify-between space-y-6">
+            <div>
+              <CardTitle className="text-3xl mb-2">{product.name}</CardTitle>
+              <CardDescription className="text-lg mb-4">{product.category}</CardDescription>
+              <p className="text-muted-foreground mb-6">{product.description}</p>
+            </div>
+            
+            <div className="space-y-4 pt-4 border-t">
+              <div>
+                <p className="text-4xl font-bold mb-2">${product.price.toFixed(2)}</p>
+                <p className="text-sm text-muted-foreground">
+                  Stock: {product.stock} available
+                </p>
+                {itemInCart && (
+                  <p className="text-sm text-green-600 font-medium mt-2 flex items-center gap-1">
+                    <CheckCircle2 className="h-4 w-4" />
+                    {cartQuantity} {cartQuantity === 1 ? 'item' : 'items'} in cart
+                  </p>
+                )}
+              </div>
+              
+              <div className="flex flex-col gap-3">
+                {itemInCart ? (
+                  <>
+                    <Button 
+                      size="lg" 
+                      variant="secondary"
+                      className="bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 w-full"
+                      disabled
+                    >
+                      <CheckCircle2 className="h-5 w-5 mr-2" />
+                      Already in Cart ({cartQuantity})
+                    </Button>
+                    <Link to="/cart" className="w-full">
+                      <Button variant="outline" size="lg" className="w-full">
+                        View Cart
+                      </Button>
+                    </Link>
+                  </>
+                ) : (
                   <Button 
                     size="lg" 
-                    variant="secondary"
-                    className="bg-green-50 text-green-700 hover:bg-green-100 border border-green-200"
-                    disabled
+                    onClick={handleAddToCart}
+                    disabled={addingToCart || product.stock === 0}
+                    className="w-full"
                   >
-                    <CheckCircle2 className="h-5 w-5 mr-2" />
-                    Already in Cart ({cartQuantity})
+                    {addingToCart ? (
+                      <>
+                        <ShoppingCart className="h-5 w-5 mr-2" />
+                        Adding...
+                      </>
+                    ) : product.stock === 0 ? (
+                      'Out of Stock'
+                    ) : (
+                      <>
+                        <ShoppingCart className="h-5 w-5 mr-2" />
+                        Add to Cart
+                      </>
+                    )}
                   </Button>
-                  <Link to="/cart">
-                    <Button variant="outline" size="sm">
-                      View Cart
-                    </Button>
-                  </Link>
-                </>
-              ) : (
-                <Button 
-                  size="lg" 
-                  onClick={handleAddToCart}
-                  disabled={addingToCart || product.stock === 0}
-                >
-                  {addingToCart ? (
-                    <>
-                      <ShoppingCart className="h-5 w-5 mr-2" />
-                      Adding...
-                    </>
-                  ) : product.stock === 0 ? (
-                    'Out of Stock'
-                  ) : (
-                    <>
-                      <ShoppingCart className="h-5 w-5 mr-2" />
-                      Add to Cart
-                    </>
-                  )}
-                </Button>
-              )}
+                )}
+              </div>
             </div>
           </div>
-        </CardContent>
+        </div>
       </Card>
     </div>
   );
